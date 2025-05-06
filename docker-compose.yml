@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  #-----------------------------------
+  #---- Private-GPT services ---------
+  #-----------------------------------
+
+  private-gpt:
+    build: .
+    user: root
+    volumes:
+      - ./data:/home/worker/app/local_data
+    ports:
+      - "8001:8001"
+    environment:
+      PORT: 8001
+      PGPT_PROFILES: docker
+      PGPT_MODE: ollama
+      PGPT_EMBED_MODE: ollama
+      PGPT_OLLAMA_API_BASE: http://ollama:11434
+      PGPT_EMBEDDING_MODEL: nomic-embed-text
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+  #-----------------------------------
+  #---- Ollama services --------------
+  #-----------------------------------
+
+  # Traefik reverse proxy for the Ollama service
+  ollama:
+    image: traefik:v2.10
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -q --spider http://ollama-cpu:11434 || exit 1"]
+      interval: 10s
+      retries: 3
+      start_period: 5s
+      timeout: 5s
+    ports:
+      - "8080:8080"
+    command:
+      - "--providers.file.filename=/etc/router.yml"
+      - "--log.level=ERROR"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:11434"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./.docker/router.yml:/etc/router.yml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Ollama service for the CPU mode
+  ollama-cpu:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    command: serve
+
+volumes:
+  ollama_data: 
