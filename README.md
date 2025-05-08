@@ -13,7 +13,7 @@ This project sets up a local RAG (Retrieval-Augmented Generation) system using P
 
 3. Build and start the containers:
    ```bash
-   docker-compose up --build
+   docker-compose up -d --build
    ```
 
 4. Pull the llama2 model (first time only):
