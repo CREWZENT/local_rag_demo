@@ -31,7 +31,7 @@ services:
   ollama:
     image: traefik:v2.10
     healthcheck:
-      test: ["CMD", "sh", "-c", "wget -q --spider http://ollama-gpu:11434 || exit 1"]
+      test: ["CMD", "sh", "-c", "wget -q --spider http://ollama-gpu:11435 || exit 1"]
       interval: 10s
       retries: 3
       start_period: 5s
@@ -55,7 +55,7 @@ services:
   ollama-gpu:
     image: ollama/ollama:latest
     ports:
-      - "11434:11434"
+      - "11435:11434"
     volumes:
       - ollama_data:/root/.ollama
     command: serve
