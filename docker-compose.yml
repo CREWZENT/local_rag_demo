@@ -31,7 +31,7 @@ services:
   ollama:
     image: traefik:v2.10
     healthcheck:
-      test: ["CMD", "sh", "-c", "wget -q --spider http://ollama-cpu:11434 || exit 1"]
+      test: ["CMD", "sh", "-c", "wget -q --spider http://ollama-gpu:11434 || exit 1"]
       interval: 10s
       retries: 3
       start_period: 5s
@@ -51,14 +51,21 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-  # Ollama service for the CPU mode
-  ollama-cpu:
+  # Ollama service for the GPU mode
+  ollama-gpu:
     image: ollama/ollama:latest
     ports:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
     command: serve
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 
 volumes:
   ollama_data: 
