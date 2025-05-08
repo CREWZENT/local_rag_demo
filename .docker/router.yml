@@ -2,12 +2,12 @@ http:
   routers:
     ollama:
       rule: "PathPrefix(`/api`)"
-      service: ollama-cpu
+      service: ollama-gpu
       entryPoints:
         - web
 
   services:
-    ollama-cpu:
+    ollama-gpu:
       loadBalancer:
         servers:
-          - url: "http://ollama-cpu:11434" 
+          - url: "http://ollama-gpu:11434" 
